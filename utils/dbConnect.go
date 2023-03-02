@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"log"
 	"os"
 	"time"
@@ -14,6 +15,7 @@ import (
 
 var DB *gorm.DB
 var err error
+var Ctx = context.Background()
 
 
 func ConnectDB(){
