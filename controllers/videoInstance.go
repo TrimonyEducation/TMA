@@ -9,50 +9,55 @@ import (
 
 //CREATE ----------------------------------------------------------------
 
-func CreateProblem(c *fiber.Ctx) error {
-	problem:=new(models.Problem)
-	if err := c.BodyParser(problem); err!=nil{
+func CreateVideoInstance(c *fiber.Ctx) error {
+	//PARSE BODY
+	videoInstance := new(models.VideoInstance)
+	if err := c.BodyParser(videoInstance); err!= nil {
+        return c.Status(400).JSON(fiber.Map{
+			"status":  "fail",
+			"msg": err.Error(),
+		})
+    }
+
+	// INSERT INTO DB
+	result:=utils.DB.Create(&videoInstance)
+	if result.Error!=nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
-            "msg": err.Error(),
+            "msg": result.Error.Error(),
+            "error": result.Error,
 		})
 	}
-	result:=utils.DB.Create(&problem)
-	if result.Error!=nil{
-		return c.Status(400).JSON(fiber.Map{
-            "status":  "fail",
-            "msg": result.Error.Error(),
 
-        })
-	}
-	return c.Status(200).JSON(fiber.Map{
-		"status": "success",
-		"data":   problem,
+	//RETURN CREATED
+	return c.JSON(fiber.Map{
+		"status":  "success",
+        "data": videoInstance,
 	})
 }
 
-//READ ------------------------------------------------------------------------------
+//READ ----------------------------------------------------------------
 
-func GetProblem(c *fiber.Ctx) error {
-	//PARAMS
+func GetVideoInstance(c *fiber.Ctx) error {
+    //GET ID
     id := c.Params("id")
 
 	//INIT VARS
-	var problem models.Problem
-	
-	//QUERY FOR PROBLEM
-   result:=utils.DB.First(&problem, "id=?", id)
+	var videoInstance models.VideoInstance
+	//QUERY FOR EXERCISE AND RELATED VIDEOS, PROBLEMS AND TAKES
+   result:=utils.DB.First(&videoInstance, "id=?", id)
 
    //CHECK FOR ERROR
     if result.Error != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": result.Error.Error(),
+            "error": result.Error,
 		})
 	}
 
 	//CHECK FOR EXISTENCE
-	if problem.ID == 0 {
+	if videoInstance.ID == 0 {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
             "msg": "exercise not found",
@@ -62,41 +67,39 @@ func GetProblem(c *fiber.Ctx) error {
 	//RETURN FOUND EXERCISE
     return c.JSON(fiber.Map{
         "status":  "success",
-        "data": problem,    
+        "data": videoInstance,    
     })
 }
 
+func GetAllVideoInstances(c *fiber.Ctx) error {
+	//INIT VARS
+	var videoInstances []models.VideoInstance
 
-func GetAllProblems(c *fiber.Ctx) error {
-	var problems []models.Problem
-	//QUERY FOR PROBLEMS
-    result:=utils.DB.Find(&problems)
-
-    //CHECK FOR ERROR
+	//QUERY FOR EXERCISES
+    result := utils.DB.Find(&videoInstances)
+	//CHECK FOR ERROR
     if result.Error!= nil {
         return c.Status(400).JSON(fiber.Map{
-            "status":  "fail",
+			"status":  "fail",
             "msg": result.Error.Error(),
-        })
+		})
     }
 
-    //RETURN FOUND EXERCISES
+	//RETURN FOUND EXERCISES
     return c.JSON(fiber.Map{
         "status":  "success",
-        "data": problems,
-		"result": len(problems),
+        "data": videoInstances,
+		"results": len(videoInstances), 
     })
 }
 
-//UPDATE -----------------------------------------------------------------------------------
+//UPDATE ----------------------------------------------------------------
 
-func UpdateProblem(c *fiber.Ctx) error {
-
-	//PARAMS
-    id := c.Params("id")
-    problem := new(models.Problem)
-	s := new(models.Problem) 
-    if err := c.BodyParser(problem); err!=nil{
+func UpdateVideoInstance(c *fiber.Ctx) error {
+	id := c.Params("id")
+    videoInstance := new(models.VideoInstance)
+	s := new(models.VideoInstance) 
+    if err := c.BodyParser(videoInstance); err!=nil{
         return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
             "msg": err.Error(),
@@ -114,32 +117,30 @@ func UpdateProblem(c *fiber.Ctx) error {
 	if s.ID == 0 {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
-            "msg": "exercise not found",
+            "msg": "record not found",
         })
 	}
-	result := utils.DB.Where("id=?", id).Updates(&problem)
+	result := utils.DB.Where("id=?", id).Updates(&videoInstance)
 	if result.Error!= nil {
 		return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
             "msg": result.Error.Error(),
-            "error": result.Error,
         })
 	}
     return c.Status(200).JSON(fiber.Map{
 		"status": "success",
-        "data":   problem,
+        "data":   videoInstance,
 	})
 }
 
+//DELETE ----------------------------------------------------------------
 
-//DELETE -----------------------------------------------------------------------------------
-
-func DeleteProblem(c *fiber.Ctx) error {
-    //PARAMS
+func DeleteVideoInstance(c *fiber.Ctx) error {
+	//PARAMS
     id := c.Params("id")
 
     //DELETE
-    result := utils.DB.Where("id=?", id).Delete(&models.Problem{})
+    result := utils.DB.Where("id=?", id).Delete(&models.VideoInstance{})
     if result.Error!=nil{
         return c.Status(400).JSON(fiber.Map{
             "status":  "fail",

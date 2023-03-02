@@ -15,6 +15,7 @@ import (
 
 //TODO: QUERY PARAMS FOR ALL READER (SEARCH BY SUBJECT); ADD isPUBLISHED TO MODELS; isFinished
 
+//!!!!!!!!!!!!!!!!! output for getAll should contain results (len of records) and data should be called data
 
 
 
@@ -75,6 +76,16 @@ func setPlaylistRoutes(app *fiber.App) {
     app.Delete("/api/playlist/:id", controllers.DeletePlaylist)
 }
 
+//!!!!!!!!!!!!!!! remove comments later
+
+func setUserRoutes(app *fiber.App) {
+	app.Post("/api/user", controllers.CreateUser)
+    //app.Get("/api/user", controllers.GetAllUsers)
+    app.Get("/api/user/:id", controllers.GetUser)
+    //app.Patch("/api/user/:id", controllers.UpdateUser)
+    //app.Delete("/api/user/:id", controllers.DeleteUser)
+}
+
 func main() {
     app := fiber.New()
 	app.Use(recover.New())
@@ -104,6 +115,9 @@ func main() {
 
 	//PLAYLIST ROUTES
 	setPlaylistRoutes(app)
+
+	//USER ROUTES
+	setUserRoutes(app)
 
 	//START SERVER
 	port:=os.Getenv("PORT")
