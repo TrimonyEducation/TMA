@@ -5,6 +5,7 @@ import (
 	"golang-crud/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 //CREATE ----------------------------------------------------------------
@@ -57,7 +58,7 @@ func GetVideoInstance(c *fiber.Ctx) error {
 	}
 
 	//CHECK FOR EXISTENCE
-	if videoInstance.ID == 0 {
+	if videoInstance.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
             "msg": "exercise not found",
@@ -114,7 +115,7 @@ func UpdateVideoInstance(c *fiber.Ctx) error {
 	}
 
 	utils.DB.Find(&s, "id =?", id)
-	if s.ID == 0 {
+	if s.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
             "msg": "record not found",

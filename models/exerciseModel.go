@@ -2,18 +2,17 @@ package models
 
 import (
 	"github.com/lib/pq"
-	"gorm.io/gorm"
 )
 
 type Exercise struct {
-	gorm.Model
-	Exercise_Title string `gorm:"not null;default:null"`
-	Exercise_Description string `gorm:"not null;default:null"`
-	Exercise_NumOfProblems int 
-	Exercise_DifficultyLevel string `gorm:"not null;default:null"`
-	Exercise_SubjectTags pq.StringArray `gorm:"type:text[]"`
-	Exercise_Chapters pq.StringArray `gorm:"type:text[]"`
-	Exercise_TopicsTags pq.StringArray `gorm:"type:text[]"`
+	Base
+	Title string `gorm:"not null;default:null"`
+	Description string `gorm:"not null;default:null"`
+	NumOfProblems int 
+	DifficultyLevel string `gorm:"not null;default:null"`
+	SubjectTags pq.StringArray `gorm:"type:text[];not null;default:null"`
+	Chapters pq.StringArray `gorm:"type:text[];not null;default:null"`
+	TopicsTags pq.StringArray `gorm:"type:text[]"`
 	Takes []Take
 	Problems []Problem
 	Videos []Video `gorm:"many2many:video_exercise;"`

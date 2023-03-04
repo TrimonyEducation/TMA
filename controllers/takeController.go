@@ -5,6 +5,7 @@ import (
 	"golang-crud/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 //CREATE ----------------------------------------------------------------
@@ -38,7 +39,7 @@ func GetTake(c *fiber.Ctx) error {
 	//INIT VARS
 	var take models.Take
 	
-	//QUERY FOR PROBLEM
+	//QUERY FOR TAKE
    result:=utils.DB.First(&take, "id=?", id)
 
    //CHECK FOR ERROR
@@ -50,23 +51,23 @@ func GetTake(c *fiber.Ctx) error {
 	}
 
 	//CHECK FOR EXISTENCE
-	if take.ID == 0 {
+	if take.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
-            "msg": "exercise not found",
+            "msg": "record not found",
         })
 	}
 
-	//RETURN FOUND EXERCISE
+	//RETURN FOUND TAKE
     return c.JSON(fiber.Map{
         "status":  "success",
-        "exercise": take,    
+        "data": take,    
     })
 }
 
 func GetAllTakes(c *fiber.Ctx) error {
 	var takes []models.Take
-	//QUERY FOR PROBLEMS
+	//QUERY FOR TAKES
     result:=utils.DB.Find(&takes)
 
     //CHECK FOR ERROR
@@ -105,10 +106,10 @@ func UpdateTake(c *fiber.Ctx) error {
 	}
 
 	utils.DB.Find(&s, "id =?", id)
-	if s.ID == 0 {
+	if s.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
-            "msg": "exercise not found",
+            "msg": "record not found",
         })
 	}
 	result := utils.DB.Where("id=?", id).Updates(&take)

@@ -5,7 +5,9 @@ import (
 	"golang-crud/utils"
 	"log"
 	"strings"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 func Protect(c *fiber.Ctx) error{
@@ -41,7 +43,7 @@ func Protect(c *fiber.Ctx) error{
 	}
 
 	//CHECK FOR EXISTENCE
-	if user.ID == 0 {
+	if user.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
 			"status":  "fail",
 			"msg": "user not found",

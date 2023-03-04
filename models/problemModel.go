@@ -1,20 +1,22 @@
 package models
 
 import (
+	"github.com/google/uuid"
 	"github.com/lib/pq"
-	"gorm.io/gorm"
 )
 
 type Problem struct {
-	gorm.Model
-	Problem_QST string
-	Problem_Body string
-	Problem_Type string
-	Problem_Options pq.GenericArray `gorm:"type:json[]"`
-	Problem_Difficulty string
-	Problem_Answer string
-	Problem_AssetLinks pq.GenericArray `gorm:"type:json[]"`
-	Problem_SolutionText string
-	Problem_SolutionVideo string
-	ExerciseID uint `gorm:"not null;default:null"`
+	Base 
+	QST string `gorm:"not null;default:null"`
+	Body string `gorm:"not null;default:null"`
+	Type string `gorm:"not null;default:null"`
+	Options pq.GenericArray `gorm:"type:json[]"`
+	Difficulty string `gorm:"not null;default:null"`
+	Answer string `gorm:"not null;default:null"`
+	AssetLinks pq.GenericArray `gorm:"type:json[]"`
+	SolutionText string 
+	SolutionVideo string
+	IsPublished bool `gorm:"not null;default:false"`
+	IsPublic bool `gorm:"not null;default:false"`
+	ExerciseID uuid.UUID `gorm:"not null;default:null"`
 }

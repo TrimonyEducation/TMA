@@ -5,6 +5,7 @@ import (
 	"golang-crud/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 //CREATE ----------------------------------------------------------------
@@ -14,7 +15,6 @@ func CreatePlaylist(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": err.Error(),
-            "error": err.Error,
 		})
 	}
 	result:=utils.DB.Create(&playlist)
@@ -22,7 +22,6 @@ func CreatePlaylist(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
             "msg": result.Error.Error(),
-            "error": result.Error,
         })
 	}
 	return c.Status(200).JSON(fiber.Map{
@@ -39,7 +38,7 @@ func GetPlaylist(c *fiber.Ctx) error {
 	//INIT VARS
 	var playlist models.Playlist
 	
-	//QUERY FOR PROBLEM
+	//QUERY FOR PLAYLIST
    result:=utils.DB.First(&playlist, "id=?", id)
 
    //CHECK FOR ERROR
@@ -51,14 +50,14 @@ func GetPlaylist(c *fiber.Ctx) error {
 	}
 
 	//CHECK FOR EXISTENCE
-	if playlist.ID == 0 {
+	if playlist.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
-            "msg": "exercise not found",
+            "msg": "record not found",
         })
 	}
 
-	//RETURN FOUND EXERCISE
+	//RETURN FOUND PLAYLIST
     return c.JSON(fiber.Map{
         "status":  "success",
         "data": playlist,    
@@ -67,7 +66,7 @@ func GetPlaylist(c *fiber.Ctx) error {
 
 func GetAllPlaylists(c *fiber.Ctx) error{
 	var playlist []models.Playlist
-	//QUERY FOR PROBLEMS
+	//QUERY FOR PLAYLISTS
     result:=utils.DB.Find(&playlist)
 
     //CHECK FOR ERROR
@@ -78,10 +77,11 @@ func GetAllPlaylists(c *fiber.Ctx) error{
         })
     }
 
-    //RETURN FOUND EXERCISES
+    //RETURN FOUND PLAYLISTS
     return c.JSON(fiber.Map{
         "status":  "success",
         "data": playlist,
+        "result": len(playlist),
     })
 }
 
@@ -103,7 +103,7 @@ func UpdatePlaylist(c *fiber.Ctx) error {
 	}
 
 	utils.DB.Find(&s, "id =?", id)
-	if s.ID == 0 {
+	if s.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
             "msg": "exercise not found",

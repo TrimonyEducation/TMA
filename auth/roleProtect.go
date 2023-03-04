@@ -14,7 +14,7 @@ func AdminOnly(c *fiber.Ctx) error {
 			"error":"unauthorized",
 		})
     }
-	if user.User_Role != "admin"{
+	if user.Role != "admin"{
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
             "status":"fail",
             "error":"unauthorized",
@@ -31,7 +31,7 @@ func TeacherAndAdminOnly(c *fiber.Ctx) error {
 			"error":"unauthorized",
 		})
     }
-	if user.User_Role != "teacher" && user.User_Role != "admin"{
+	if user.Role != "teacher" && user.Role != "admin"{
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
             "status":"fail",
             "error":"unauthorized",

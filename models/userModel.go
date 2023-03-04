@@ -1,24 +1,29 @@
 package models
 
 import (
-	"gorm.io/gorm"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type User struct {
-	gorm.Model
-	User_Email string `gorm:"unique;not null;default:null"`
-	User_Password string
-	User_Name string `gorm:"unique;not null;default:null"`
-	User_ProfilePicture string
-	User_Role string `gorm:"not null;default:'user'"`
-	User_SchoolGrade string `gorm:"not null;default:null"`
-	User_SchoolLevel string `gorm:"not null;default:null"`
-	User_IsPaid bool `gorm:"not null;default:false"`
-	User_IsAdmin bool `gorm:"not null;default:false"`
-	User_IsBanned bool `gorm:"not null;default:false"`
-	User_CompletedOnboarding bool `gorm:"not null;default:false"`
-	User_isTeacher bool `gorm:"not null;default:false"`
-	User_EmailVerified bool `gorm:"not null;default:false"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time `sql:"index"`
+	Email string `gorm:"unique;not null;default:null"`
+	Password string
+	Name string `gorm:"unique;not null;default:null"`
+	ProfilePicture string
+	Role string `gorm:"not null;default:'user'"`
+	SchoolGrade string `gorm:"not null;default:null"`
+	SchoolLevel string `gorm:"not null;default:null"`
+	IsPaid bool `gorm:"not null;default:false"`
+	IsAdmin bool `gorm:"not null;default:false"`
+	IsBanned bool `gorm:"not null;default:false"`
+	CompletedOnboarding bool `gorm:"not null;default:false"`
+	IsTeacher bool `gorm:"not null;default:false"`
+	EmailVerified bool `gorm:"not null;default:false"`
 	Playlists []Playlist
 	Review Review
 	VideoInstance []VideoInstance

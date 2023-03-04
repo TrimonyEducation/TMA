@@ -1,13 +1,11 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
+import "github.com/google/uuid"
 
 type Playlist struct {
-	gorm.Model
-	Playlist_Count int `gorm:"not null;default:0"`
-	Playlist_Name string `gorm:"not null;default:null"`
-	VideoInstance []VideoInstance
-	UserID uint `gorm:"not null;default:null"`
+	Base
+	Count int `gorm:"not null;default:0"`
+	Title string `gorm:"not null;default:null"`
+	Videos []VideoInstance
+	UserID uuid.UUID `gorm:"not null;default:null"`
 }

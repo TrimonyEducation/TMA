@@ -5,6 +5,7 @@ import (
 	"golang-crud/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 //CREATE ----------------------------------------------------------------
@@ -12,6 +13,7 @@ import (
 func CreateExercise(c *fiber.Ctx) error {
 	//PARSE BODY
 	exercise := new(models.Exercise)
+	x := new(ExerciseWithID)
 	if err := c.BodyParser(exercise); err!= nil {
         return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
@@ -19,13 +21,22 @@ func CreateExercise(c *fiber.Ctx) error {
 		})
     }
 
+	
 	// INSERT INTO DB
 	result:=utils.DB.Create(&exercise)
+	if x.VideoID != "" {
+		result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+exercise.ID.String()+","+x.VideoID+");")
+		if result.Error!= nil {
+            return c.Status(400).JSON(fiber.Map{
+				"status":  "fail",
+                "msg": result.Error.Error(),
+			})
+        }
+	}
 	if result.Error!=nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": result.Error.Error(),
-            "error": result.Error,
 		})
 	}
 
@@ -53,15 +64,14 @@ func GetExercise(c *fiber.Ctx) error {
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": result.Error.Error(),
-            "error": result.Error,
 		})
 	}
 
 	//CHECK FOR EXISTENCE
-	if exercise.ID == 0 {
+	if exercise.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
-            "msg": "exercise not found",
+            "msg": "record not found",
         })
 	}
 
@@ -83,13 +93,12 @@ func GetAllExercises(c *fiber.Ctx) error {
         return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": result.Error.Error(),
-            "error": result.Error,
 		})
     }
 
 	//RETURN FOUND EXERCISES
     return c.JSON(fiber.Map{
-        "status":  "success",
+        "status": "success",
         "data": exercises,
 		"results": len(exercises), 
     })
@@ -108,7 +117,7 @@ func UpdateExercise(c *fiber.Ctx) error {
     //IS GOING TO BE UPDATED
 	exercise:=new(models.Exercise)
 
-	//FOR BODYPARSER TO RECIEVE ID FROM BODY
+	//FOR BODYPARSER TO RECIEVE VideoID FROM BODY
 	x := new(ExerciseWithID)
 
 	s := new(models.Exercise)
@@ -117,14 +126,12 @@ func UpdateExercise(c *fiber.Ctx) error {
         return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": err.Error(),
-            "error": err.Error,
 		})
     }
 	if err := c.BodyParser(exercise); err!= nil {
         return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": err.Error(),
-            "error": err.Error,
 		})	
     }
 	//GET ID
@@ -138,20 +145,19 @@ func UpdateExercise(c *fiber.Ctx) error {
 		})
 	}
 
-	//IF VidID IS PRESENT INSERT EXERCISE ID AND PRESENT ID INTO JOIN TABLE
+	//IF VideoID IS PRESENT INSERT EXERCISE ID AND PRESENT ID INTO JOIN TABLE
 	if x.VideoID != "" {
 		result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+id+","+x.VideoID+");")
 		if result.Error!= nil {
             return c.Status(400).JSON(fiber.Map{
 				"status":  "fail",
                 "msg": result.Error.Error(),
-                "error": result.Error,
 			})
         }
 	}
 
 	utils.DB.Find(&s, "id =?", id)
-	if s.ID == 0 {
+	if s.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
             "msg": "exercise not found",
@@ -185,7 +191,6 @@ func DeleteExercise(c *fiber.Ctx) error {
         return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": result.Error.Error(),
-            "error": result.Error,
 		})
     }
     return c.JSON(fiber.Map{

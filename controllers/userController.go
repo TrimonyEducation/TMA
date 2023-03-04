@@ -5,6 +5,7 @@ import (
 	"golang-crud/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 // CREATE ----------------------------------------------------------------
@@ -19,7 +20,7 @@ func CreateUser(c *fiber.Ctx) error{
     }
 
 	// INSERT INTO DB
-	result:=utils.DB.Create(&models.User{User_Email: user.User_Email, User_Name: user.User_Name, User_SchoolGrade: user.User_SchoolGrade, User_SchoolLevel: user.User_SchoolLevel, User_isTeacher: user.User_isTeacher, User_CompletedOnboarding: user.User_CompletedOnboarding, User_EmailVerified: user.User_EmailVerified, User_ProfilePicture: user.User_ProfilePicture})
+	result:=utils.DB.Create(&models.User{Email: user.Email, Name: user.Name, SchoolGrade: user.SchoolGrade, SchoolLevel: user.SchoolLevel, IsTeacher: user.IsTeacher, CompletedOnboarding: user.CompletedOnboarding, EmailVerified: user.EmailVerified, ProfilePicture: user.ProfilePicture})
 	if result.Error!=nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
@@ -56,10 +57,10 @@ func GetUser(c *fiber.Ctx) error {
 	}
 
 	//CHECK FOR EXISTENCE
-	if user.ID == 0 {
+	if user.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
 			"status":  "fail",
-			"msg": "exercise not found",
+			"msg": "record not found",
 		})
 	}
 
@@ -111,13 +112,13 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	utils.DB.Find(&s, "id =?", id)
-	if s.ID == 0 {
+	if s.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
-            "msg": "user not found",
+            "msg": "record not found",
         })
 	}
-	result := utils.DB.Where("id=?", id).Updates(&models.User{User_Email: user.User_Email, User_Name: user.User_Name, User_SchoolGrade: user.User_SchoolGrade, User_SchoolLevel: user.User_SchoolLevel, User_isTeacher: user.User_isTeacher, User_CompletedOnboarding: user.User_CompletedOnboarding, User_EmailVerified: user.User_EmailVerified})
+	result := utils.DB.Where("id=?", id).Updates(&models.User{Email: user.Email, Name: user.Name, SchoolGrade: user.SchoolGrade, SchoolLevel: user.SchoolLevel, IsTeacher: user.IsTeacher, CompletedOnboarding: user.CompletedOnboarding, EmailVerified: user.EmailVerified})
 	if result.Error!= nil {
 		return c.Status(400).JSON(fiber.Map{
             "status":  "fail",

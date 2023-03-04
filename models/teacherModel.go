@@ -1,13 +1,13 @@
 package models
 
 import (
+	"github.com/google/uuid"
 	"github.com/lib/pq"
-	"gorm.io/gorm"
 )
 
 type Teacher struct {
-	gorm.Model
-	Teacher_School string
-	Teacher_Subjects pq.StringArray `gorm:"type:text[]"`
-	UserID int
+	Base
+	School string
+	Subjects pq.StringArray `gorm:"type:text[]"`
+	UserID uuid.UUID
 }

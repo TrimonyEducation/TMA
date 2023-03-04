@@ -5,16 +5,26 @@ import (
 	"golang-crud/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 // CREATE --------------------------------------------------------------------------------
 
 func CreateVideo(c *fiber.Ctx) error {
         video:= new(models.Video)
+		x := new(VideoWithID)
         if err := c.BodyParser(video); err != nil {
             return c.Status(503).SendString(err.Error())
         }
+
+		
 		result := utils.DB.Create(&video)
+		if x.ExerciseID != "" {
+			result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+x.ExerciseID+","+video.ID.String()+");")
+			if result.Error!= nil {
+				return c.Status(fiber.StatusBadRequest).JSON(result.Error)
+			}
+		}
 		if result.Error != nil {
 			return c.Status(400).JSON(fiber.Map{
 				"status": "fail",
@@ -58,17 +68,17 @@ func GetVideo(c *fiber.Ctx) error {
 	}
 
 	//CHECK FOR EXISTENCE
-	if video.ID == 0 {
+	if video.ID == uuid.Nil  {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
             "status":  "failed",
-            "message": "video not found",
+            "msg": "video not found",
         })
 	}
 
 	//RETURN FOUND EXERCISE
     return c.JSON(fiber.Map{
         "status":  "success",
-        "exercise": video,    
+        "data": video,    
     })
 }
 
@@ -110,7 +120,7 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 	//IF "ExerciseID" IS PRESENT INSERT VIDEO ID AND "ExerciseID" INTO JOIN TABLE
 	if x.ExerciseID != "" {
-		result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+id+","+x.ExerciseID+");")
+		result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+x.ExerciseID+","+id+");")
 		if result.Error!= nil {
             return c.Status(fiber.StatusBadRequest).JSON(result.Error)
         }
@@ -118,10 +128,10 @@ func UpdateVideo(c *fiber.Ctx) error {
 
 	//FIND A VIDEO BY ID AND CHECK IF IT EXISTS
 	utils.DB.Find(&s, "id =?", id)
-	if s.ID == 0 {
+	if s.ID == uuid.Nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
             "status":  "fail",
-            "message": "video not found",
+            "msg": "record not found",
         })
 	}
 
@@ -147,21 +157,15 @@ func UpdateVideo(c *fiber.Ctx) error {
 // DELETE -----------------------------------------------------------------------------------
 
 func DeleteVideo(c *fiber.Ctx) error {
-	id, err := c.ParamsInt("id")
+	id := c.Params("id")
 	var video models.Video
-	if id == 0 {
+	if id == "" {
 		return c.Status(400).JSON(fiber.Map{
             "status":"fail",
             "msg": "ID incorrect",
         })
 	}
 
-    if err!= nil {	
-		return c.Status(400).JSON(fiber.Map{
-            "status":"fail",
-            "msg": "ID missing",
-        })
-	}
 	result := utils.DB.Delete(&video, "id =?", id)
 	if result.Error!= nil {
 		return c.Status(400).JSON(fiber.Map{
