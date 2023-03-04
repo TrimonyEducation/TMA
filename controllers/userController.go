@@ -28,6 +28,7 @@ func CreateUser(c *fiber.Ctx) error {
 	// INSERT INTO DB
 	result := utils.DB.Create(&models.User{
 		Email:               user.Email,
+		ID:                  user.ID,
 		Name:                user.Name,
 		SchoolGrade:         user.SchoolGrade,
 		SchoolLevel:         user.SchoolLevel,

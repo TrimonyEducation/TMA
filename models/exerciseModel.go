@@ -11,7 +11,6 @@ type Exercise struct {
 	NumOfProblems int 
 	DifficultyLevel string `gorm:"not null;default:null"`
 	SubjectTags pq.StringArray `gorm:"type:text[];not null;default:null"`
-	Chapters pq.StringArray `gorm:"type:text[];not null;default:null"`
 	TopicsTags pq.StringArray `gorm:"type:text[]"`
 	Takes []Take
 	Problems []Problem

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"golang-crud/models"
 	"golang-crud/utils"
 
@@ -18,6 +20,11 @@ func CreateClass(c *fiber.Ctx) error {
 			"msg":    err.Error(),
 		})
 	}
+
+	b := make([]byte, 5) //equals 10 characters
+	rand.Read(b)
+	s := hex.EncodeToString(b)
+	class.JoinCode = string(s)
 
 	result := utils.DB.Create(&class)
 
@@ -49,7 +56,7 @@ func GetClass(c *fiber.Ctx) error {
 	var class models.Class
 
 	//QUERY FOR PROBLEM
-	result := utils.DB.Model(&class).Preload("Teacher").First(&class, "id=?", id)
+	result := utils.DB.Model(&class).Preload("Teacher").Preload("Students").First(&class, "id=?", id)
 
 	//CHECK FOR ERROR
 	if result.Error != nil {

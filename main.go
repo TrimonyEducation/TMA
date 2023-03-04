@@ -71,11 +71,11 @@ func setTakeRoutes(app *fiber.App){
 }
 
 func setClassRoutes(app *fiber.App) {
-	app.Post("/api/class", auth.TeacherAndAdminOnly, controllers.CreateClass)
+	app.Post("/api/class", controllers.CreateClass)
     app.Get("/api/class", controllers.GetAllClasses)
 	app.Get("/api/class/:id", controllers.GetClass)
-    app.Patch("/api/class/:id", auth.TeacherAndAdminOnly, controllers.UpdateClass)
-    app.Delete("/api/class/:id", auth.TeacherAndAdminOnly, controllers.DeleteClass)
+    app.Patch("/api/class/:id", controllers.UpdateClass)
+    app.Delete("/api/class/:id", controllers.DeleteClass)
 }
 
 func setAnswerRoutes(app *fiber.App) {
