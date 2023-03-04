@@ -2,8 +2,8 @@ package models
 
 import (
 	"time"
-
 	"github.com/google/uuid"
+	
 )
 
 type User struct {
@@ -11,8 +11,7 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
-	Email string `gorm:"unique;not null;default:null"`
-	Password string
+	Email string `gorm:"unique;not null;default:null; validate:email"`
 	Name string `gorm:"unique;not null;default:null"`
 	ProfilePicture string
 	Role string `gorm:"not null;default:'user'"`

@@ -19,15 +19,15 @@ import (
 
 /**------------------------------------------------------------------------
  * todo                             TODO
- *   QUERY PARAMS FOR ALL READER (SEARCH BY SUBJECT);
+ *   
  *   
  *  
  *   READ ALL CONTROLLERS
  *   CHECK ALL CONTROLLERS
  *   
- *   INPUT VALIDATION
+ *   
  *------------------------------------------------------------------------**/
-//!!!!!!!!!!!!!!!!! output for getAll should contain results (len of records) and data should be called data
+
 
 func init(){
 	err:=godotenv.Load()

@@ -12,91 +12,108 @@ import (
 // CREATE --------------------------------------------------------------------------------
 
 func CreateVideo(c *fiber.Ctx) error {
-        video:= new(models.Video)
-		x := new(VideoWithID)
-        if err := c.BodyParser(video); err != nil {
-            return c.Status(503).SendString(err.Error())
-        }
 
-		
-		result := utils.DB.Create(&video)
-		if x.ExerciseID != "" {
-			result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+x.ExerciseID+","+video.ID.String()+");")
-			if result.Error!= nil {
-				return c.Status(fiber.StatusBadRequest).JSON(result.Error)
-			}
-		}
+	video := new(models.Video)
+
+	x := new(VideoWithID)
+
+	if err := c.BodyParser(video); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": "fail",
+			"msg":    err.Error(),
+		})
+	}
+
+	result := utils.DB.Create(&video)
+
+	//MANY TO MANY HANDLER
+	if x.ExerciseID != "" {
+		result := utils.DB.Exec("INSERT INTO video_exercise VALUES(" + x.ExerciseID + "," + video.ID.String() + ");")
 		if result.Error != nil {
 			return c.Status(400).JSON(fiber.Map{
 				"status": "fail",
-				"err": result.Error.Error(),
+				"msg":    result.Error.Error(),
 			})
 		}
-		return c.Status(200).JSON(fiber.Map{
-			"status": "success",
-			"data": video,
+	}
+
+	if result.Error != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": "fail",
+			"msg":    result.Error.Error(),
 		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"status": "success",
+		"data":   video,
+	})
 }
 
 // READ -----------------------------------------------------------------------------------
 
 func GetAllVideos(c *fiber.Ctx) error {
+
 	var video []models.Video
-	
+
 	subject := c.Query("subject")
+
 	if subject == "" {
 		result := utils.DB.Find(&video)
-		if result.Error!= nil {
+		if result.Error != nil {
 			return c.Status(400).JSON(fiber.Map{
-				"status":  "fail",
-				"msg": result.Error.Error(),
+				"status": "fail",
+				"msg":    result.Error.Error(),
 			})
 		}
 	} else {
 		result := utils.DB.Where("subject_tags @> ?", pq.Array([]string{subject})).Find(&video)
-        if result.Error!= nil {
-            return c.Status(401).JSON(fiber.Map{
-                "status":  "fail",
-                "msg": result.Error.Error(),
-            })
-        }
+		if result.Error != nil {
+			return c.Status(401).JSON(fiber.Map{
+				"status": "fail",
+				"msg":    result.Error.Error(),
+			})
+		}
 	}
-	
+
 	return c.Status(200).JSON(fiber.Map{
 		"status": "success",
 		"result": len(video),
-		"data": video,
+		"data":   video,
 	})
 }
 
 func GetVideo(c *fiber.Ctx) error {
 	//GET ID
-    id := c.Params("id")
-	
+	id := c.Params("id")
+
 	//INIT VARS
 	var video models.Video
 
 	//QUERY FOR EXERCISE AND RELATED VIDEOS, PROBLEMS AND TAKES
-   result:=utils.DB.Model(&video).Preload("Exercises").Preload("Exercises.Problems").Find(&video, "id=?", id)
+	result := utils.DB.Model(&video).Preload("Exercises").Preload("Exercises.Problems").Find(&video, "id=?", id)
 
-   //CHECK FOR ERROR
-    if result.Error != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(result.Error)
+	//CHECK FOR ERROR
+	if result.Error != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": "fail",
+			"msg":    result.Error.Error(),
+		})
 	}
 
 	//CHECK FOR EXISTENCE
-	if video.ID == uuid.Nil  {
+	if video.ID == uuid.Nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-            "status":  "failed",
-            "msg": "video not found",
-        })
+			"status": "failed",
+			"msg":    "record not found",
+		})
 	}
 
 	//RETURN FOUND EXERCISE
-    return c.JSON(fiber.Map{
-        "status":  "success",
-        "data": video,    
-    })
+	return c.JSON(fiber.Map{
+		"status": "success",
+		"data":   video,
+	})
 }
 
 // UPDATE -----------------------------------------------------------------------------------
@@ -108,65 +125,74 @@ type VideoWithID struct {
 
 func UpdateVideo(c *fiber.Ctx) error {
 	//TO UPDATE A VIDEO BY ID
-	video:=new(models.Video)
+	video := new(models.Video)
 
 	//FOR BODYPARSER TO RECIEVE ID FROM BODY
 	x := new(VideoWithID)
 
 	//TO FIND A VIDEO BY ID
-	s:=new(models.Video)
+	s := new(models.Video)
 
 	//CHECK FOR ERROR
-    if err := c.BodyParser(x); err!= nil {
-        return err
-    }
-	if err := c.BodyParser(video); err!= nil {
-        return err
-    }
+	if err := c.BodyParser(x); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+	}
+	if err := c.BodyParser(video); err != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status":  "fail",
+			"message": err.Error(),
+		})
+	}
 
 	//GET ID
-    id := c.Params("id")
+	id := c.Params("id")
 
 	//CHECK FOR ID
 	if id == "" {
 		return c.Status(400).JSON(fiber.Map{
-			"status":"fail",
-			"msg": "ID incorrect",
+			"status": "fail",
+			"msg":    "ID incorrect",
 		})
 	}
 
 	//IF "ExerciseID" IS PRESENT INSERT VIDEO ID AND "ExerciseID" INTO JOIN TABLE
 	if x.ExerciseID != "" {
-		result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+x.ExerciseID+","+id+");")
-		if result.Error!= nil {
-            return c.Status(fiber.StatusBadRequest).JSON(result.Error)
-        }
+		result := utils.DB.Exec("INSERT INTO video_exercise VALUES(" + x.ExerciseID + "," + id + ");")
+		if result.Error != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"status": "fail",
+				"msg":    result.Error.Error(),
+			})
+		}
 	}
 
 	//FIND A VIDEO BY ID AND CHECK IF IT EXISTS
 	utils.DB.Find(&s, "id =?", id)
 	if s.ID == uuid.Nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-            "status":  "fail",
-            "msg": "record not found",
-        })
+			"status": "fail",
+			"msg":    "record not found",
+		})
 	}
 
 	//FIND VIDEO BY ID AND UPDATE IT
-	result := utils.DB.Where("id = ?", id).Updates(&video)	
+	result := utils.DB.Where("id = ?", id).Updates(&video)
 
 	//CHECK FOR ERROR
-	if result.Error!=nil {
-        return c.Status(203).JSON(fiber.Map{
-			"status":"fail",
-			"msg":result.Error.Error(),
+	if result.Error != nil {
+		return c.Status(400).JSON(fiber.Map{
+			"status": "fail",
+			"msg":    result.Error.Error(),
 		})
-    }
+	}
 
 	//RETURN UPDATED VIDEO
 	return c.Status(200).JSON(fiber.Map{
 		"status": "success",
-        "data": video,
+		"data":   video,
 	})
 
 }
@@ -178,27 +204,27 @@ func DeleteVideo(c *fiber.Ctx) error {
 	var video models.Video
 	if id == "" {
 		return c.Status(400).JSON(fiber.Map{
-            "status":"fail",
-            "msg": "ID incorrect",
-        })
+			"status": "fail",
+			"msg":    "ID incorrect",
+		})
 	}
 
 	result := utils.DB.Delete(&video, "id =?", id)
-	if result.Error!= nil {
+	if result.Error != nil {
 		return c.Status(400).JSON(fiber.Map{
-            "status":"fail",
-            "msg": result.Error.Error(),
-        })
+			"status": "fail",
+			"msg":    result.Error.Error(),
+		})
 	}
 	if result.RowsAffected == 0 {
 		return c.Status(400).JSON(fiber.Map{
-            "status":"fail",
-            "msg": "Couldn't delete video",
-        })
+			"status": "fail",
+			"msg":    "Couldn't delete video",
+		})
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-        "status": "success",
-		"msg": "Video deleted",
-    })
+		"status": "success",
+		"msg":    "Video deleted",
+	})
 }
