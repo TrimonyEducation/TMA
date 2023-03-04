@@ -132,7 +132,7 @@ func UpdateClass(c *fiber.Ctx) error {
 	if s.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
-            "msg": "exercise not found",
+            "msg": "record not found",
         })
 	}
 	result := utils.DB.Where("id=?", id).Updates(&class)

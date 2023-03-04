@@ -8,16 +8,15 @@ import (
 	"github.com/google/uuid"
 )
 
-//CREATE ----------------------------------------------------------------
-func CreatePlaylist(c *fiber.Ctx) error {
-	playlist:=new(models.Playlist)
-	if err := c.BodyParser(playlist); err!=nil{
+func CreateAnswer(c *fiber.Ctx) error {
+	answer:=new(models.Answers)
+	if err := c.BodyParser(answer); err!=nil{
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
             "msg": err.Error(),
 		})
 	}
-	result:=utils.DB.Create(&playlist)
+	result:=utils.DB.Create(&answer)
 	if result.Error!=nil{
 		return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
@@ -26,20 +25,18 @@ func CreatePlaylist(c *fiber.Ctx) error {
 	}
 	return c.Status(200).JSON(fiber.Map{
 		"status": "success",
-		"data": playlist,
+		"data": answer,
 	})
 }
 
-//READ ----------------------------------------------------------------
-
-func GetPlaylist(c *fiber.Ctx) error {
+func GetAnswer(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	//INIT VARS
-	var playlist models.Playlist
+	var answer models.Answers
 	
-	//QUERY FOR PLAYLIST 
-   result:=utils.DB.Model(&playlist).Preload("Videos").Find(&playlist, "id=?", id)
+	//QUERY FOR answer 
+   result:=utils.DB.Find(&answer, "id=?", id)
 
    //CHECK FOR ERROR
     if result.Error != nil {
@@ -50,24 +47,24 @@ func GetPlaylist(c *fiber.Ctx) error {
 	}
 
 	//CHECK FOR EXISTENCE
-	if playlist.ID == uuid.Nil {
+	if answer.ID == uuid.Nil {
 		return c.Status(404).JSON(fiber.Map{
             "status":  "fail",
             "msg": "record not found",
         })
 	}
 
-	//RETURN FOUND PLAYLIST
+	//RETURN FOUND answer
     return c.JSON(fiber.Map{
         "status":  "success",
-        "data": playlist,    
+        "data": answer,    
     })
 }
 
-func GetAllPlaylists(c *fiber.Ctx) error{
-	var playlist []models.Playlist
-	//QUERY FOR PLAYLISTS
-    result:=utils.DB.Find(&playlist)
+func GetAllAnswers(c *fiber.Ctx) error{
+	var answers []models.Answers
+	//QUERY FOR answerS
+    result:=utils.DB.Find(&answers)
     //CHECK FOR ERROR
     if result.Error!= nil {
         return c.Status(400).JSON(fiber.Map{
@@ -76,19 +73,19 @@ func GetAllPlaylists(c *fiber.Ctx) error{
         })
     }
 
-    //RETURN FOUND PLAYLISTS
+    //RETURN FOUND answerS
     return c.JSON(fiber.Map{
         "status":  "success",
-        "data": playlist,
-        "result": len(playlist),
+        "data": answers,
+        "result": len(answers),
     })
 }
 
-func UpdatePlaylist(c *fiber.Ctx) error {
+func UpdateAnswer(c *fiber.Ctx) error {
 	id := c.Params("id")
-    playlist := new(models.Playlist)
-	s := new(models.Playlist) 
-    if err := c.BodyParser(playlist); err!=nil{
+    answer := new(models.Answers)
+	s := new(models.Answers) 
+    if err := c.BodyParser(answer); err!=nil{
         return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
             "msg": err.Error(),
@@ -108,7 +105,7 @@ func UpdatePlaylist(c *fiber.Ctx) error {
             "msg": "record not found",
         })
 	}
-	result := utils.DB.Where("id=?", id).Updates(&playlist)
+	result := utils.DB.Where("id=?", id).Updates(&answer)
 	if result.Error!= nil {
 		return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
@@ -117,14 +114,14 @@ func UpdatePlaylist(c *fiber.Ctx) error {
 	}
     return c.Status(200).JSON(fiber.Map{
 		"status": "success",
-        "data":   playlist,
+        "data":   answer,
 	})
 }
 
-func DeletePlaylist(c *fiber.Ctx) error {
+func DeleteAnswer(c *fiber.Ctx) error {
 	id := c.Params("id")
-    result := utils.DB.Where("id=?", id).Delete(&models.Playlist{})
-    if result.Error!=nil{
+    result := utils.DB.Where("id=?", id).Delete(&models.Answers{})
+    if result.Error!=nil {
         return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
             "msg": result.Error.Error(),

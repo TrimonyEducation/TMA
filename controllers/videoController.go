@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 // CREATE --------------------------------------------------------------------------------
@@ -41,10 +42,26 @@ func CreateVideo(c *fiber.Ctx) error {
 
 func GetAllVideos(c *fiber.Ctx) error {
 	var video []models.Video
-	result := utils.DB.Find(&video)
-	if  result.RowsAffected == 0 {
-        return c.SendStatus(404)
-    }
+	
+	subject := c.Query("subject")
+	if subject == "" {
+		result := utils.DB.Find(&video)
+		if result.Error!= nil {
+			return c.Status(400).JSON(fiber.Map{
+				"status":  "fail",
+				"msg": result.Error.Error(),
+			})
+		}
+	} else {
+		result := utils.DB.Where("subject_tags @> ?", pq.Array([]string{subject})).Find(&video)
+        if result.Error!= nil {
+            return c.Status(401).JSON(fiber.Map{
+                "status":  "fail",
+                "msg": result.Error.Error(),
+            })
+        }
+	}
+	
 	return c.Status(200).JSON(fiber.Map{
 		"status": "success",
 		"result": len(video),

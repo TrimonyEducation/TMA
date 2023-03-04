@@ -8,10 +8,16 @@ import (
 	"github.com/google/uuid"
 )
 
+type UserWithID struct {
+	models.Class
+	ClassID string
+}
+
 // CREATE ----------------------------------------------------------------
 func CreateUser(c *fiber.Ctx) error{
 	//PARSE BODY
 	user := new(models.User)
+	x := new(UserWithID)
 	if err := c.BodyParser(user); err!= nil {
         return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
@@ -21,6 +27,15 @@ func CreateUser(c *fiber.Ctx) error{
 
 	// INSERT INTO DB
 	result:=utils.DB.Create(&models.User{Email: user.Email, Name: user.Name, SchoolGrade: user.SchoolGrade, SchoolLevel: user.SchoolLevel, IsTeacher: user.IsTeacher, CompletedOnboarding: user.CompletedOnboarding, EmailVerified: user.EmailVerified, ProfilePicture: user.ProfilePicture})
+	if x.ClassID != "" {
+		result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+user.ID.String()+","+x.ClassID+");")
+		if result.Error!= nil {
+            return c.Status(400).JSON(fiber.Map{
+				"status":  "fail",
+                "msg": result.Error.Error(),
+			})
+        }
+	}
 	if result.Error!=nil {
 		return c.Status(400).JSON(fiber.Map{
 			"status":  "fail",
@@ -98,6 +113,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	id := c.Params("id")
     user := new(models.User)
 	s := new(models.User) 
+	x := new(UserWithID)
     if err := c.BodyParser(user); err!=nil{
         return c.Status(400).JSON(fiber.Map{
             "status":  "fail",
@@ -109,6 +125,16 @@ func UpdateUser(c *fiber.Ctx) error {
             "status":  "fail",
             "msg": "ID is missing",
         })
+	}
+
+	if x.ClassID != "" {
+		result := utils.DB.Exec("INSERT INTO video_exercise VALUES("+id+","+x.ClassID+");")
+		if result.Error!= nil {
+            return c.Status(400).JSON(fiber.Map{
+				"status":  "fail",
+                "msg": result.Error.Error(),
+			})
+        }
 	}
 
 	utils.DB.Find(&s, "id =?", id)

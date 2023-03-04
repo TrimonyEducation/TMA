@@ -20,11 +20,11 @@ import (
 /**------------------------------------------------------------------------
  * todo                             TODO
  *   QUERY PARAMS FOR ALL READER (SEARCH BY SUBJECT);
- *   ADD isPUBLISHED, isFinished, IsPublic, uuid TO MODELS
- *   Join tables
+ *   
+ *  
  *   READ ALL CONTROLLERS
  *   CHECK ALL CONTROLLERS
- *   ADD ROLE BASED AUTH TO CONTROLLERS
+ *   
  *   INPUT VALIDATION
  *------------------------------------------------------------------------**/
 //!!!!!!!!!!!!!!!!! output for getAll should contain results (len of records) and data should be called data
@@ -78,12 +78,28 @@ func setClassRoutes(app *fiber.App) {
     app.Delete("/api/class/:id", auth.TeacherAndAdminOnly, controllers.DeleteClass)
 }
 
+func setAnswerRoutes(app *fiber.App) {
+	app.Post("/api/answer", controllers.CreateAnswer)
+    app.Get("/api/answer", controllers.GetAllAnswers)
+    app.Get("/api/answer/:id", controllers.GetAnswer)
+    app.Patch("/api/answer/:id", controllers.UpdateAnswer)
+    app.Delete("/api/answer/:id", controllers.DeleteAnswer)
+}
+
 func setPlaylistRoutes(app *fiber.App) {
 	app.Post("/api/playlist", controllers.CreatePlaylist)
     app.Get("/api/playlist", controllers.GetAllPlaylists)
     app.Get("/api/playlist/:id", controllers.GetPlaylist)
     app.Patch("/api/playlist/:id", controllers.UpdatePlaylist)
     app.Delete("/api/playlist/:id", controllers.DeletePlaylist)
+}
+
+func setReviewRoutes(app *fiber.App) {
+	app.Post("/api/review", controllers.CreateReview)
+    app.Get("/api/review", controllers.GetAllReviews)
+    app.Get("/api/review/:id", controllers.GetReview)
+    app.Patch("/api/review/:id", controllers.UpdateReview)
+    app.Delete("/api/review/:id", controllers.DeleteReview)
 }
 
 //!!!!!!!!!!!!!!! remove comments later
@@ -130,11 +146,17 @@ func main() {
 	//TAKE ROUTES
 	setTakeRoutes(app)
 
+	//REVIEW ROUTES
+	setReviewRoutes(app)
+
 	//CLASS ROUTES
 	setClassRoutes(app)
 
 	//PLAYLIST ROUTES
 	setPlaylistRoutes(app)
+
+	//ANSWER ROUTES
+	setAnswerRoutes(app)
 
 	//USER ROUTES
 	setUserRoutes(app)
