@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -19,13 +20,13 @@ import (
 
 /**------------------------------------------------------------------------
  * todo                             TODO
- *   
- *   
- *  
+ *
+ *
+ *
  *   READ ALL CONTROLLERS
  *   CHECK ALL CONTROLLERS
- *   
- *   
+ *
+ *
  *------------------------------------------------------------------------**/
 
 
@@ -39,8 +40,8 @@ func init(){
 }
 
 func setVideoRoutes(app *fiber.App){
-	app.Post("/api/video", controllers.CreateVideo)
-	app.Get("/api/video", controllers.GetAllVideos)
+	app.Post("/api/video", auth.Protect, controllers.CreateVideo)
+	app.Get("/api/video", auth.Protect, controllers.GetAllVideos)
 	app.Get("/api/video/:id", controllers.GetVideo)
 	app.Patch("/api/video/:id", controllers.UpdateVideo)
 	app.Delete("/api/video/:id", controllers.DeleteVideo)
@@ -117,6 +118,7 @@ func main() {
 		BodyLimit: 4 * 1024 * 1024,
 	})
 	app.Use(helmet.New())
+	app.Use(cors.New())
 	app.Use(limiter.New(limiter.Config{
 		Max: 50,
 		Expiration: 60 * time.Second,

@@ -5,7 +5,6 @@ import (
 	"golang-crud/utils"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 )
 
 type UserWithID struct {
@@ -39,7 +38,7 @@ func CreateUser(c *fiber.Ctx) error {
 	})
 
 	if x.ClassID != "" {
-		result := utils.DB.Exec("INSERT INTO video_exercise VALUES(" + user.ID.String() + "," + x.ClassID + ");")
+		result := utils.DB.Exec("INSERT INTO video_exercise VALUES(" + user.ID + "," + x.ClassID + ");")
 		if result.Error != nil {
 			return c.Status(400).JSON(fiber.Map{
 				"status": "fail",
@@ -86,7 +85,7 @@ func GetUser(c *fiber.Ctx) error {
 	}
 
 	//CHECK FOR EXISTENCE
-	if user.ID == uuid.Nil {
+	if user.ID == "" {
 		return c.Status(404).JSON(fiber.Map{
 			"status": "fail",
 			"msg":    "record not found",
@@ -152,7 +151,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	utils.DB.Find(&s, "id =?", id)
-	if s.ID == uuid.Nil {
+	if s.ID == "" {
 		return c.Status(404).JSON(fiber.Map{
 			"status": "fail",
 			"msg":    "record not found",
